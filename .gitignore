@@ -1,0 +1,8 @@
+# Ignore les fichiers générés par Node.js
+backend/node_modules/
+frontend/node_modules/
+# .env
+
+# Ignore les fichiers générés par Docker
+.docker/
+# docker-compose.yml

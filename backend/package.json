@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Ayoub Ait Bahllou",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.2",
+    "slugify": "^1.3.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.1.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.2"
+  }
+}
