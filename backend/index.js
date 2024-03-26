@@ -2,32 +2,38 @@ const express = require('express')
 var bodyParser = require('body-parser')
 const logger = require('morgan')
 require('dotenv').config();
-const db = require('./config/dbconnect')
+const db = require('./src/models')
+const errorHandler = require('./src/middlewares/error');
 const path = require('path')
 
-var app = express();
+var app = express()
+
+/* >> Log */
 app.use(logger())
 if(process.env.NODE_ENV !== "test") {
-	app.use(logger("dev"));
+	app.use(logger("dev"))
 }
-app.use(bodyParser.json());
+app.use(bodyParser.json())
 
-/* >> CONNECT TO DB */
-db.authenticate()
-.then(() => {
-    console.log('Connected to DB!')
-    db.query("CREATE DATABASE IF NOT EXISTS my_database;");
-})
-.catch(error => console.error('Impossible to connect with DB :', error))
-
-/* >> ROUTES */
-app.get('/', (req, res) => res.send('INDEX') ) 
-// app.use("/api/user", require('./routes/User'))
+/* >> parse requests of content-type - application/json */
+app.use(express.json())
 
 /* >> HANDLE ERROR */
+app.use((err, req, res, next) => {
+    console.error('Erreur non gérée :', err)
+    res.status(500).send('Erreur interne du serveur')
+});
 // 
+
+/* >> ROUTES */
+app.get('/', (req, res) => res.send('INDEX')) 
+app.use("/api/user", require('./src/routes/User'))
+
+app.use(errorHandler)
 
 /* >> ROOT DIRECTOR OF STATIC ASSET */
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.listen(process.env.SERVER_PORT || 8080)
+db.sequelize.sync().then(req => {    
+    app.listen(process.env.SERVER_PORT || 3001)
+})
