@@ -1,0 +1,57 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - master  # Déclencher le workflow lors d'un push sur la branche main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Étape pour le backend Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Version de Node.js à utiliser
+
+      - name: Install backend dependencies
+        run: |
+          cd backend  # Aller dans le répertoire backend
+          npm install  # Installer les dépendances
+
+      # - name: Run backend tests
+      #   run: |
+      #     cd backend  # Aller dans le répertoire backend
+      #     npm test  # Exécuter les tests du backend
+
+      # Étape pour le frontend React.js
+      - name: Setup Node.js for frontend
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Version de Node.js à utiliser
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend  # Aller dans le répertoire frontend
+          npm install  # Installer les dépendances
+
+      # - name: Build frontend
+      #   run: |
+      #     cd frontend  # Aller dans le répertoire frontend
+      #     npm run build  # Construire l'application frontend
+
+      # Étape de déploiement sur le serveur (exemple : déploiement sur AWS EC2)
+      # - name: Deploy to AWS EC2
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   run: |
+      #     # Commandes pour déployer l'application sur AWS EC2
+      #     # Exemple : utiliser scp ou rsync pour transférer les fichiers vers le serveur
+      #     scp -r frontend/build username@server-ip:/path/to/deploy
+
+      #     # Redémarrer le serveur ou les services nécessaires après le déploiement
+      #     ssh username@server-ip "sudo systemctl restart service-name"

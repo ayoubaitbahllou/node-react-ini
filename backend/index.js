@@ -1,39 +1,33 @@
 const express = require('express')
 var bodyParser = require('body-parser')
 const logger = require('morgan')
-require('dotenv').config();
-const db = require('./src/models')
-const errorHandler = require('./src/middlewares/error');
-const path = require('path')
+const errorHandler = require('./middlewares/error');
+const ErrorResponse = require('./utils/errorResponse');
 
 var app = express()
 
-/* >> Log */
-app.use(logger())
-if(process.env.NODE_ENV !== "test") {
+// Logger of http requests
+if(process.env.NODE_ENV !== "development") {
 	app.use(logger("dev"))
 }
 app.use(bodyParser.json())
 
-/* >> parse requests of content-type - application/json */
+// parse requests of (content-type - application/json) And add body attribute to req to handle Post-Put-Patch requests
 app.use(express.json())
 
-/* >> HANDLE ERROR */
-app.use((err, req, res, next) => {
-    console.error('Erreur non gérée :', err)
-    res.status(500).send('Erreur interne du serveur')
-});
-// 
-
-/* >> ROUTES */
+// ROUTES 
 app.get('/', (req, res) => res.send('INDEX')) 
-app.use("/api/user", require('./src/routes/User'))
+app.use("/api/user", require('./routes/User'))
 
+// ROOT DIRECTOR OF STATIC ASSET 
+app.use(express.static('/public'))
+
+// Handle Non exciting route
+app.all("*", (req, res, next) => {
+    next(new ErrorResponse("Path Not Fount", 404))
+})
+
+// HANDLE Global Errors
 app.use(errorHandler)
 
-/* >> ROOT DIRECTOR OF STATIC ASSET */
-app.use(express.static(path.join(__dirname, 'public')))
-
-db.sequelize.sync().then(req => {    
-    app.listen(process.env.SERVER_PORT || 3001)
-})
+module.exports = app

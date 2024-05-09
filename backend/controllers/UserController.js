@@ -12,22 +12,18 @@ module.exports.userRegistration = asyncHandler(async (req, res, next) => {
     } else {
       if (name && email && password && password_confirmation) {
         if (password === password_confirmation) {
-          try {
-            const salt = await bcrypt.genSalt(10)
-            const hashPassword = await bcrypt.hash(password, salt)
-            const doc = new UserModel({
-                name: name,
-                email: email,
-                password: hashPassword
-            })
-            await doc.save()
-            const saved_user = await UserModel.findOne({ email: email })
-            // Generate JWT Token
-            const token = jwt.sign({ userID: saved_user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' })
-            res.status(201).send({ "status": "success", "message": "Registration Success", "token": token })
-          } catch (error) {
-            next(new ErrorResponse("Unable to Register", 400))
-          }
+          const salt = await bcrypt.genSalt(10)
+          const hashPassword = await bcrypt.hash(password, salt)
+          const doc = new UserModel({
+              name: name,
+              email: email,
+              password: hashPassword
+          })
+          await doc.save()
+          const saved_user = await UserModel.findOne({ email: email })
+          // Generate JWT Token
+          const token = jwt.sign({ userID: saved_user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' })
+          res.status(201).send({ "status": "success", "message": "Registration Success", "token": token })
         } else {
             next(new ErrorResponse("Password and Confirm Password doesn't match", 400))
         }
@@ -38,27 +34,23 @@ module.exports.userRegistration = asyncHandler(async (req, res, next) => {
 })
 
 module.exports.userLogin = asyncHandler(async (req, res, next) => {
-    try {
-      const { email, password } = req.body
-      if (email && password) {
-        const user = await UserModel.findOne({ email: email })
-        if (user != null) {
-          const isMatch = await bcrypt.compare(password, user.password)
-          if ((user.email === email) && isMatch) {
-            // Generate JWT Token
-            const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' })
-            res.send({ "status": "success", "message": "Login Success", "token": token })
-          } else {
-            next(new ErrorResponse("Email or Password is not Valid", 400))
-          }
+    const { email, password } = req.body
+    if (email && password) {
+      const user = await UserModel.findOne({ email: email })
+      if (user != null) {
+        const isMatch = await bcrypt.compare(password, user.password)
+        if ((user.email === email) && isMatch) {
+          // Generate JWT Token
+          const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' })
+          res.send({ "status": "success", "message": "Login Success", "token": token })
         } else {
-            next(new ErrorResponse("You are not a Registered User", 400))
+          next(new ErrorResponse("Email or Password is not Valid", 400))
         }
       } else {
-        next(new ErrorResponse("All Fields are Required", 400))
+          next(new ErrorResponse("You are not a Registered User", 400))
       }
-    } catch (error) {
-      next(new ErrorResponse("Unable to Login", 400))
+    } else {
+      next(new ErrorResponse("All Fields are Required", 400))
     }
 })
 
@@ -82,9 +74,9 @@ module.exports.changeUserPassword = asyncHandler(async (req, res, next) => {
     }
 })
 
-module.exports.loggedUser = asyncHandler((req, res, next) => {
+module.exports.loggedUser = (req, res, next) => {
     res.send({ "user": req.user })
-})
+}
 /*
 module.exports.sendUserPasswordResetEmail = (req, res, next) => {
     const { email } = req.body
